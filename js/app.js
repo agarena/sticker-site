@@ -188,6 +188,17 @@ function downloadSticker(s) {
   toast("已开始下载原图");
 }
 
+async function copyText(text) {
+  try { await navigator.clipboard.writeText(text); return true; }
+  catch {
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = text; ta.style.cssText = "position:fixed;opacity:0;";
+      document.body.appendChild(ta); ta.select();
+      const ok = document.execCommand("copy"); ta.remove(); return ok;
+    } catch { return false; }
+  }
+}
 async function copySticker(s) {
   try {
     const blob = await fetch(s.file).then(r => r.blob());
@@ -266,6 +277,7 @@ function openModal(id, focusComments = false) {
         <button class="btn solid" data-act2="download">${icon("download", 15)} 下载原图</button>
         <button class="btn" data-act2="copy">${icon("copy", 14)} 复制图片</button>
         <button class="btn btn-like ${likedMap[s.id] ? "on" : ""}" data-act2="like" data-like="${s.id}">${icon("heart", 14)} <i>${likeCount(s)}</i></button>
+        <button class="btn" data-act2="share" data-id="${esc(s.id)}">${icon("share", 14)} 分享</button>
         <span class="m-report">${icon("flag", 13)} 举报 / 侵权反馈</span>
       </div>
       <div class="m-cmts">
@@ -294,6 +306,13 @@ function openModal(id, focusComments = false) {
     if (b.dataset.act2 === "download") downloadSticker(s);
     if (b.dataset.act2 === "copy") copySticker(s);
     if (b.dataset.act2 === "like") { toggleLike(s.id); $("#modal .btn-like i").textContent = likeCount(s); }
+    if (b.dataset.act2 === "share") {
+      const text = "【" + s.title + "】AI 表情库 · 不吃鲸B，各大模型角色二创表情一站收齐 " + location.origin + "/";
+      copyText(text).then(ok => {
+        if (ok) { toast("分享文案已复制，粘贴给朋友即可"); pfLog("share", s.id); }
+        else toast("复制失败，请手动复制", true);
+      });
+    }
   });
   const send = () => sendComment(s);
   $("#cmtSend").onclick = send;
