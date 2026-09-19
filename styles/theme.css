@@ -1,0 +1,136 @@
+/* ==========================================================
+ * 风格 A · 可爱贴纸风 · 纸黄版（Cute Sticker / Paper Yellow）
+ * 纸黄底 + 蜂蜜琥珀主色 + 橄榄/麦秆辅助色，牛皮纸手账贴纸气质
+ * ========================================================== */
+
+:root {
+  --bg: #f6eeda;
+  --panel: #fffdf4;
+  --card: #fffdf4;
+  --ink: #453b2c;
+  --ink2: #a08e74;
+  --line: #e8dcc0;
+  --accent: #d9862a;
+  --accent-ink: #ffffff;
+  --chip-bg: #fffdf4;
+  --chip-line: #ddc99e;
+  --chip-on-bg: #d9862a;
+  --chip-on-ink: #ffffff;
+  --frame: #f5ecd7;
+  --radius-s: 8px;
+  --radius-m: 14px;
+  --radius-l: 22px;
+  --font-head: "Yuanti SC", "YouYuan", "幼圆", "Comic Sans MS", "Microsoft YaHei", sans-serif;
+  --font-body: "Yuanti SC", "YouYuan", "幼圆", "Microsoft YaHei", sans-serif;
+  --shadow-card: 0 4px 14px rgba(180, 140, 60, .16);
+  --shadow-pop: 0 24px 60px rgba(120, 90, 40, .28);
+}
+
+body {
+  background:
+    radial-gradient(#ece0c2 2.2px, transparent 2.6px),
+    radial-gradient(#e2e9d4 2.2px, transparent 2.6px),
+    var(--bg);
+  background-size: 34px 34px, 34px 34px;
+  background-position: 0 0, 17px 17px;
+}
+
+::selection { background: #f3e2b4; }
+
+/* 顶栏 */
+.topbar { border-bottom: 2px dashed #e3d5b4; }
+.logo .mark { background: #d9862a; border-radius: 12px 12px 12px 2px; }
+.nav-links a.on { background: #f5e8c8; color: #a3691f; }
+
+/* Hero */
+.hero { position: relative; }
+.hero h1 { color: #4a3e2b; }
+.hero > h1 {
+  display: inline-block; padding: 2px 10px;
+  background: linear-gradient(transparent 64%, #f5e3ae 64%);
+  border-radius: 6px;
+}
+.hero p { color: #b3a284; }
+.search-big { border: 3px solid #e3b96a; box-shadow: 0 6px 0 #ead9b8; }
+.search-big button { background: #d9862a; border-radius: 0; }
+/* 角落装饰：纯 CSS 圆点气泡 */
+.hero::before, .hero::after {
+  content: ""; position: absolute; pointer-events: none;
+  border-radius: 50%;
+}
+.hero::before {
+  width: 52px; height: 52px; left: 13%; top: 44px;
+  background: radial-gradient(circle at 32% 30%, #ffd89a, #eab768);
+  opacity: .9; box-shadow: 14px 34px 0 -16px #cfdcb8;
+}
+.hero::after {
+  width: 34px; height: 34px; right: 14%; top: 96px;
+  background: radial-gradient(circle at 32% 30%, #d3e2b8, #acc98c);
+  opacity: .9; box-shadow: -22px 30px 0 -12px #f2d9a0;
+}
+
+/* 角色行 */
+.role .avatar { border: 3px solid #fff; box-shadow: 0 5px 0 #ead9b8, var(--shadow-card); }
+.role:hover .avatar { transform: scale(1.07) rotate(-3deg); }
+.role-name { color: #4a3e2b; }
+.role-count { color: #b3a284; }
+
+/* 工具条 */
+.toolbar { border: 2px solid #e8dcc0; border-radius: 18px; box-shadow: 0 4px 0 #e8dcc0; }
+.chip { border-width: 1.5px; color: #7d6a4d; }
+.chip.on { background: #d9862a; border-color: #d9862a; }
+.chip-group { border-style: dashed; }
+
+/* 卡片：贴纸感 */
+.masonry { counter-reset: gal; }
+.card {
+  border: 2px solid #ecdfc2; border-radius: 18px;
+  box-shadow: 0 5px 0 #f0e6cc, var(--shadow-card);
+  transform: rotate(-.5deg);
+}
+.card:nth-child(even) { transform: rotate(.5deg); }
+.card:hover { transform: rotate(0) translateY(-4px); box-shadow: 0 9px 0 #e7d7b4, var(--shadow-card); }
+.card .ph { padding: 9px 9px 0; background: transparent; }
+.card .ph img { border-radius: 12px; }
+.meta-title { color: #4a3e2b; }
+.tag-emo { background: #fdeed2; border-color: #eed9a8; color: #a3762a; }
+.tag-char { background: #eef2e2; border-color: #d6dfc2; color: #647a3f; }
+button.tag-char:hover { background: #e4ecd2; color: #55692f; border-color: #bfd0a4; }
+.act { border-radius: 9px; }
+.act:hover { background: #f5ecd7; border-color: #ddc99e; color: #a3691f; }
+.act-like.on { background: #ffe9ee; color: #e5533d; border-color: #f2b8c0; }
+.act-like.on i { color: #e5533d; }
+.badge { background: #d9862a; border-radius: 999px; }
+.badge.new { background: #e0553d; }
+
+/* 按钮 */
+.btn { border-radius: 999px; border-width: 2px; border-color: #ddc99e; color: #a3691f; }
+.btn:hover { background: #f5ecd7; }
+.btn.solid { background: #d9862a; border-color: #d9862a; }
+.btn.solid:hover { background: #e69640; }
+.btn-like.on { color: #e5533d; border-color: #f2b8c0; background: #ffe9ee; }
+
+/* 弹窗 */
+#modal { border-radius: 22px; border: 2px solid #ecdfc2; }
+.m-left { background: #f5ecd7; border-radius: 0; }
+.m-big img { border-radius: 14px; border: 4px solid #fff; box-shadow: 0 8px 0 rgba(180,140,60,.18); }
+.kv { border-color: #e8dcc0; }
+.modal-x { background: #ddc99e; }
+.modal-x:hover { background: #c9b184; }
+
+/* 评论 */
+.cmt-form input, .cmt-form textarea { border-radius: 12px; background: #fff; border-color: #e4d8bc; }
+.cmt-ava.a0 { background: #b98a3a; } .cmt-ava.a1 { background: #d97b4a; }
+.cmt-ava.a2 { background: #8aa054; } .cmt-ava.a3 { background: #a484c8; }
+.cmt-ava.a4 { background: #d96a7a; }
+
+/* 投稿 */
+.sub-form { border: 2px solid #e8dcc0; border-radius: 18px; box-shadow: 0 4px 0 #e8dcc0; }
+.drop { border-color: #ddc99e; border-radius: 14px; }
+.drop:hover, .drop.drag { border-color: #d9862a; color: #a3691f; background: #faf3e0; }
+.f-input { border-radius: 12px; background: #fff; border-color: #e4d8bc; }
+
+/* 杂项 */
+#toast { background: #6b5636; color: #fdf6e6; }
+.empty { color: #b3a284; }
+.sort-wrap select { border-radius: 999px; }
