@@ -58,7 +58,7 @@ Cloudflare D1（表：stickers / sticker_likes / sticker_comments / pf_logs + �
 
 ## 开放投稿 API（可接 AI 工具自动投稿）
 
-无需注册，公开接口，先审后显。滥用受频率限制（同 IP 3 次/分钟，超限返回 429）与蜜罐防线。图片统一为前端压缩后的 dataURL：最长边压到 ≤800px，PNG 保透明优先，超 200KB 转 JPEG 0.75，最终 ≤200KB。
+无需注册，公开接口，先审后显。滥用受频率限制（同 IP 3 次/分钟，超限返回 429）与蜜罐防线。图片统一为前端压缩后的 dataURL：最长边压到 ≤1080px，PNG 保透明优先，超 200KB 转 JPEG 0.75，最终 ≤200KB。
 
 ### 提交投稿
 
@@ -69,7 +69,7 @@ Content-Type: application/json
 
 | 字段 | 必填 | 说明 |
 |---|---|---|
-| img | 是 | 表情图 dataURL，仅接受 `data:image/(png|jpeg|jpg|webp);base64,` 前缀，且整体 ≤200KB；建议最长边 800px |
+| img | 是 | 表情图 dataURL，仅接受 `data:image/(png|jpeg|jpg|webp|gif);base64,`（GIF ≤200KB 原样直传保动图，无法自动压缩） 前缀，且整体 ≤200KB；建议最长边 1080px |
 | title | 否 | 标题，≤80 字，默认取文件名 |
 | characters | 否 | 角色 key 数组，≤5 个。有效 key：deepseek / doubao / chatgpt / claude / gemini / kimi / qwen / ernie / yuanbao / spark / zhipu / grok / copilot（服务端统一转小写）；留空或未知 key 归入「未分类」 |
 | tags | 否 | 自定义标签数组，≤6 个，每个 ≤16 字（自动去 `#` 前缀）；常用：开心 / 搞笑 / 得意 / 无语 / 生气 / 悲伤 / 震惊 / 通用 |

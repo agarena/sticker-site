@@ -640,19 +640,24 @@ function bindSubmit(root) {
 
   $("#subReset", root).onclick = () => renderView();
 
-  /* 压缩：最长边 ≤800px；优先保透明（PNG），超 200KB 则转 JPEG 0.75 */
+  /* 压缩：最长边 ≤1080px；WebP(透明+小体积) 优先，PNG 保透明兜底，JPEG 最后；均须 ≤200KB */
   const compressImg = (dataUrl) => new Promise(resolve => {
     const img = new Image();
     img.onload = () => {
       try {
-        const scale = Math.min(1, 800 / Math.max(img.width, img.height));
+        const scale = Math.min(1, 1080 / Math.max(img.width, img.height));
         const cv = document.createElement("canvas");
         cv.width = Math.max(1, Math.round(img.width * scale));
         cv.height = Math.max(1, Math.round(img.height * scale));
         cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
-        const png = cv.toDataURL("image/png");
-        if (png.length <= 200 * 1024) return resolve(png);
-        resolve(cv.toDataURL("image/jpeg", 0.75));
+        const LIMIT = 200 * 1024;
+        const candidates = [
+          cv.toDataURL("image/webp", 0.8),
+          cv.toDataURL("image/png"),
+          cv.toDataURL("image/jpeg", 0.78),
+        ];
+        for (const d of candidates) if (d.length <= LIMIT) return resolve(d);
+        resolve(candidates[candidates.length - 1]);
       } catch (e) { resolve(null); }
     };
     img.onerror = () => resolve(null);
@@ -680,9 +685,21 @@ function bindSubmit(root) {
           r.readAsDataURL(picked.file);
         });
         if (!dataUrl) throw new Error("read fail");
-        let img = await compressImg(dataUrl);
-        if (!img || img.length > 200 * 1024) img = "";
-        if (!img) { toast("图片压缩后仍过大，请换一张小图", true); goBtn.disabled = false; return; }
+        let img;
+        if (picked.file.type === "image/gif") {
+          // GIF 动图无法 canvas 压缩（会丢帧变静图）：≤200KB 原样直传保动图，超限拒绝
+          if (dataUrl.length > 200 * 1024) {
+            toast("GIF 动图超 200KB 且无法自动压缩，请用工具缩小后投稿", true);
+            goBtn.disabled = false; return;
+          }
+          img = dataUrl;
+        } else {
+          img = await compressImg(dataUrl);
+          if (!img || img.length > 200 * 1024) {
+            toast("图片压缩后仍过大，请换一张小图", true);
+            goBtn.disabled = false; return;
+          }
+        }
         const r = await fetch(API_BASE + "/api/stickers/submit", {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
