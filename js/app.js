@@ -44,10 +44,11 @@ document.addEventListener("visibilitychange", () => { if (document.visibilitySta
 /* 页面访问与停留时长 → /api/collect（visits 表，后台图表可见） */
 const T0 = Date.now();
 let dwellSent = false;
+const SITE_PATH = '/stickers/'; // 独立域名下 pathname 是 /，用固定路径让后台访问路径能区分各站
 function collectSend(events) {
   const body = JSON.stringify({
     anonId: VID, sessionId: SID,
-    context: { path: location.pathname, referrer: document.referrer || null, landing: location.pathname + location.search },
+    context: { path: SITE_PATH, referrer: document.referrer || null, landing: location.host + location.pathname + location.search },
     events
   });
   try { fetch(API_BASE + "/api/collect", { method: "POST", headers: { "Content-Type": "application/json" }, body, keepalive: true }).catch(() => { }); } catch { }
@@ -55,7 +56,7 @@ function collectSend(events) {
 function reportDwell() {
   if (dwellSent || !API_ON) return;
   dwellSent = true;
-  collectSend([{ type: "dwell", path: location.pathname, ts: Date.now(), meta: { dwell: Date.now() - T0 } }]);
+  collectSend([{ type: "dwell", path: SITE_PATH, ts: Date.now(), meta: { dwell: Date.now() - T0 } }]);
   flushPfLog();
 }
 addEventListener("pagehide", reportDwell);
@@ -789,7 +790,7 @@ async function loadRemote() {
     }
   } catch (e) { /* 离线/预览：保留 data.js 兜底，不上报 */ }
   if (API_ON) {
-    collectSend([{ type: "page_view", path: location.pathname, ts: Date.now() }]);
+    collectSend([{ type: "page_view", path: SITE_PATH, ts: Date.now() }]);
     pfLog("page_view", "", { ref: document.referrer || null });
   }
   try {
