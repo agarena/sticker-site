@@ -399,3 +399,6 @@ body.modal-open #modalBackdrop { display: flex; }
 /* 首页加载更多 */
 .load-more { display: flex; justify-content: center; padding: 8px 0 4px; }
 .load-more .btn { padding: 10px 26px; }
+
+/* 卡片收录时间 */
+.meta-time { font-size: 0.72rem; color: rgba(58, 44, 28, 0.55); margin-top: 2px; }

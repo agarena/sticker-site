@@ -17,7 +17,7 @@ const CHARACTERS = [
   { key: "ernie",    name: "文心一言",   color: "#4a6cf7" },
   { key: "yuanbao",  name: "腾讯元宝",   color: "#2f88ff" },
   { key: "spark",    name: "讯飞星火",   color: "#e2543e" },
-  { key: "zhipu",    name: "智谱清言",   color: "#5b7ce6" },
+  { key: "zhipu",    name: "GLM",        color: "#5b7ce6" },
   { key: "grok",     name: "Grok",      color: "#3a3a3a" },
   { key: "copilot",  name: "Copilot",   color: "#0f9d8f" },
 ];

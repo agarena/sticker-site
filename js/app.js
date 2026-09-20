@@ -68,6 +68,12 @@ let homeLimit = 8; // 首页「最新上架」展示数，点「加载更多」�
 const charName = (key) => (CHARACTERS.find(c => c.key === key) || { name: key }).name;
 const esc = (s) => String(s).replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
 
+function fmtDT(ts) {
+  if (!ts) return "";
+  const d = new Date(ts);
+  const p = (n) => String(n).padStart(2, "0");
+  return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()) + " " + p(d.getHours()) + ":" + p(d.getMinutes());
+}
 function fmtTime(ts) {
   const d = Date.now() - ts;
   const m = Math.floor(d / 60000);
@@ -140,6 +146,7 @@ function cardHTML(s, idx) {
     </div>
     <figcaption class="meta">
       <div class="meta-title" title="${esc(s.title)}">${esc(s.title)}</div>
+      <div class="meta-time">收录 ${s.created_ts ? fmtDT(s.created_ts) : esc(s.added || "")}</div>
       <div class="meta-tags">${chars}${emo}</div>
       <div class="meta-acts">
         <button class="act" data-act="download" title="下载原图">${icon("download", 14)}</button>
@@ -301,7 +308,7 @@ function openModal(id, focusComments = false) {
         <div class="kv"><span class="k">标签</span><span>${s.tags.map(e => `<span class="tag tag-emo">#${esc(e)}</span>`).join(" ")}</span></div>
         <div class="kv"><span class="k">作者 / 出处</span><span>${esc(s.author)}</span></div>
         <div class="kv"><span class="k">格式</span><span>${esc(s.format || "图片")}</span></div>
-        <div class="kv"><span class="k">收录时间</span><span>${esc(s.added)}</span></div>
+        <div class="kv"><span class="k">收录时间</span><span>${esc(s.created_ts ? fmtDT(s.created_ts) : s.added)}</span></div>
       </div>
       <div class="m-actions">
         <button class="btn solid" data-act2="download">${icon("download", 15)} 下载原图</button>
@@ -339,6 +346,17 @@ function openModal(id, focusComments = false) {
     if (b.dataset.act2 === "share") shareSticker(s);
   });
   const send = () => sendComment(s);
+  const mr = $(".m-report");
+  if (mr) {
+    mr.style.cursor = "pointer";
+    mr.onclick = () => {
+      const subject = encodeURIComponent("举报/侵权反馈：" + s.title);
+      const info = "举报对象：" + s.title + "（编号 " + s.id + "）。举报理由：";
+      const bodyText = encodeURIComponent(info);
+      location.href = "mailto:agarena@agent.qq.com?subject=" + subject + "&body=" + bodyText;
+      toast("已为你打开邮件，说明情况即可，我们会第一时间处理");
+    };
+  }
   $("#cmtSend").onclick = send;
   $("#cmtText").addEventListener("keydown", (e) => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) send(); });
 }
