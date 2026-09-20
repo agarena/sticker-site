@@ -190,6 +190,25 @@ function downloadSticker(s) {
   toast("已开始下载原图");
 }
 
+/* 感知哈希：8x8 灰度均值哈希（aHash），用于投稿去重（16 位 hex） */
+async function perceptualHash(file) {
+  const dataUrl = await new Promise((resolve) => { const r = new FileReader(); r.onload = () => resolve(r.result); r.onerror = () => resolve(null); r.readAsDataURL(file); });
+  if (!dataUrl) return "";
+  const img = await new Promise((resolve) => { const i = new Image(); i.onload = () => resolve(i); i.onerror = () => resolve(null); i.src = dataUrl; });
+  if (!img) return "";
+  const cv = document.createElement("canvas");
+  cv.width = 8; cv.height = 8;
+  cv.getContext("2d").drawImage(img, 0, 0, 8, 8);
+  const d = cv.getContext("2d").getImageData(0, 0, 8, 8).data;
+  const g = [];
+  for (let i = 0; i < 64; i++) g.push(0.299 * d[i * 4] + 0.587 * d[i * 4 + 1] + 0.114 * d[i * 4 + 2]);
+  const avg = g.reduce((a, b) => a + b, 0) / 64;
+  let bin = "";
+  for (let i = 0; i < 64; i++) bin += g[i] >= avg ? "1" : "0";
+  let hex = "";
+  for (let i = 0; i < 64; i += 4) hex += parseInt(bin.slice(i, i + 4), 2).toString(16);
+  return hex;
+}
 function shareSticker(s) {
   const url = location.origin + "/?id=" + encodeURIComponent(s.id);
   const text = "【" + s.title + "】AI 表情库 · 不吃鲸B，各大模型角色二创表情一站收齐 " + url;
@@ -704,16 +723,21 @@ function bindSubmit(root) {
             goBtn.disabled = false; return;
           }
         }
+        const hash = await perceptualHash(picked.file);
         const r = await fetch(API_BASE + "/api/stickers/submit", {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             title: titleIn || fallbackTitle.replace(/^投稿 · /, ""),
             characters: [...selC], tags: [...selT],
             author: authorName, platform,
-            img, vid: VID
+            img, hash, vid: VID
           })
         });
         const j = await r.json().catch(() => null);
+        if (j && j.msg === "duplicate" && j.existing) {
+          toast("这张表情库中已收「" + (j.existing.title || "同名表情") + "」，无需重复投稿");
+          goBtn.disabled = false; return;
+        }
         if (!j || !j.ok) throw new Error((j && j.msg) || r.status);
         pfLog("submit", j.id, { title: titleIn || fallbackTitle });
         toast("投稿成功，审核通过后会展现在表情库");
