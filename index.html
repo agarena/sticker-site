@@ -3,27 +3,57 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI 表情库 · 不吃鲸B</title>
-<link rel="canonical" href="https://stickers.agarena.xyz/">
-<link rel="stylesheet" href="styles/base.css?v=20260920b">
-<link rel="stylesheet" href="styles/theme.css?v=20260920b">
+<!-- 2026-09-21 站点迁移:表情包站已并入 WorkBuddy 新站,本页仅作跳转公告。
+     assets/ 等静态资源保留未动(门户封面与外部直链仍在引用)。
+     回退方式:git revert 本文件后 npx wrangler pages deploy . --project-name sticker-site --branch main -->
+<meta http-equiv="refresh" content="5; url=https://ai-stickers.app.workbuddy.host/" id="refreshMeta">
+<title>AI 表情库已搬家 · 不吃鲸B</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(160deg, #fdf8f0, #f6eedd);
+    font-family: system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    color: #3d3528; padding: 24px;
+  }
+  .card {
+    max-width: 480px; text-align: center; background: #fff; border-radius: 20px;
+    padding: 44px 38px; box-shadow: 0 10px 40px rgba(120, 90, 40, .12);
+  }
+  .brand { font-size: 13px; letter-spacing: .25em; color: #b08b4f; margin-bottom: 16px; }
+  h1 { font-size: 24px; margin: 0 0 12px; }
+  .card p { line-height: 1.8; color: #6b6152; margin: 8px 0; font-size: 15px; }
+  .new-url { font-weight: 600; color: #8a6a2f; }
+  .btn {
+    display: inline-block; margin: 20px 0 10px; padding: 13px 38px; border-radius: 999px;
+    background: #e8a23d; color: #fff; text-decoration: none; font-size: 16px; font-weight: 600;
+    box-shadow: 0 4px 14px rgba(232, 162, 61, .4);
+  }
+  .btn:hover { background: #d99432; }
+  .hint { font-size: 13px; color: #a89a83; }
+</style>
 </head>
 <body>
-
-<header class="topbar">
-  <div class="topbar-in">
-    <div class="logo"><span class="mark"></span>AI 表情库</div>
-    <nav class="nav-links" id="navLinks"></nav>
-    <div class="nav-search"><input id="navSearch" placeholder="搜索角色 / 标签，回车搜索"></div>
-  </div>
-</header>
-
-<main id="view"></main>
-
-<div id="modalBackdrop"><div id="modal" role="dialog" aria-modal="true"></div></div>
-
-<script src="js/icons.js?v=20260920b"></script>
-<script src="js/data.js?v=20260920b"></script>
-<script src="js/app.js?v=20260920b"></script>
+<main class="card">
+  <div class="brand">不吃鲸B · AI 表情库</div>
+  <h1>表情库已搬家 🐋</h1>
+  <p>本站已迁移到新家「<b>不吃鲸B的AI二创表情库</b>」,全部表情与数据同步过去,<br>投稿、点赞、评论请移步新站。</p>
+  <p class="new-url">ai-stickers.app.workbuddy.host</p>
+  <a id="goBtn" class="btn" href="https://ai-stickers.app.workbuddy.host/">前往新站</a>
+  <p class="hint" id="hint">5 秒后自动跳转…</p>
+</main>
+<script>
+  // 深链兼容:两站表情 id 一致,?id=xxx 原样带给新站(新站支持 ?id= 直开详情弹窗);hash 路由也一并带上
+  (function () {
+    var target = "https://ai-stickers.app.workbuddy.host/" + (location.search || "") + (location.hash || "");
+    document.getElementById("goBtn").href = target;
+    document.getElementById("refreshMeta").setAttribute("content", "5; url=" + target);
+    var left = 5;
+    setInterval(function () {
+      left--;
+      if (left > 0) document.getElementById("hint").textContent = left + " 秒后自动跳转…";
+    }, 1000);
+  })();
+</script>
 </body>
 </html>

@@ -5,6 +5,8 @@
 - 线上地址：<https://stickers.agarena.xyz>（即将上线）
 - 联系邮箱由后端 `/api/site` 运行时覆盖（「关于」页内置兜底）
 
+> **⚠️ 2026-09-21 起本站已迁移：** 新家 <https://ai-stickers.app.workbuddy.host>（不吃鲸B的AI二创表情库）。本仓库页面仅保留为跳转公告页；旧后端读接口冻结为只读归档，投稿接口已封口（410）。本 README 以下内容为迁移前的历史记录。
+
 ## 架构
 
 ```
@@ -13,7 +15,7 @@
    │  GET  /api/stickers/comments    全量评论（缓存 30s）
    │  POST /api/stickers/like        点赞/取消（按访客 shufy_anon 去重）
    │  POST /api/stickers/comment     评论（留言即显）
-   │  POST /api/stickers/submit      投稿（先审后显）
+   │  POST /api/stickers/submit      投稿（已于 2026-09-21 封口返回 410，见「开放投稿 API（已停用）」）
    │  POST /api/prompts/log          关键节点行为日志（批量，site='stickers'）
    │  POST /api/collect              页面访问与停留时长（复用主站统计）
    ▼
@@ -56,65 +58,11 @@ Cloudflare D1（表：stickers / sticker_likes / sticker_comments / pf_logs + �
 
 服务端错误（error）与管理操作（admin_publish / admin_hide / admin_delete / admin_delete_comment）同样入 pf_logs。
 
-## 开放投稿 API（可接 AI 工具自动投稿）
+## 开放投稿 API（已于 2026-09-21 停用）
 
-无需注册，公开接口，先审后显。滥用受频率限制（同 IP 3 次/分钟，超限返回 429）与蜜罐防线。图片统一为前端压缩后的 dataURL：最长边压到 ≤1080px，PNG 保透明优先，超 200KB 转 JPEG 0.75，最终 ≤200KB。
+本站投稿通道已整体迁移至新站 <https://ai-stickers.app.workbuddy.host>。新站开放投稿接口为**令牌制**（服务端校验、可随时吊销），令牌不对外公开，需要接入自动投稿请联系站长 agarena@agent.qq.com 获取；完整接口文档仅存于站长本地。
 
-### 提交投稿
-
-```
-POST https://api.agarena.xyz/api/stickers/submit
-Content-Type: application/json
-```
-
-| 字段 | 必填 | 说明 |
-|---|---|---|
-| img | 是 | 表情图 dataURL，仅接受 `data:image/(png|jpeg|jpg|webp|gif);base64,`（GIF ≤200KB 原样直传保动图，无法自动压缩） 前缀，且整体 ≤200KB；建议最长边 1080px |
-| title | 否 | 标题，≤80 字，默认取文件名 |
-| characters | 否 | 角色 key 数组，≤5 个。有效 key：deepseek / doubao / chatgpt / claude / gemini / kimi / qwen / ernie / yuanbao / spark / zhipu / grok / copilot（服务端统一转小写）；留空或未知 key 归入「未分类」 |
-| tags | 否 | 自定义标签数组，≤6 个，每个 ≤16 字（自动去 `#` 前缀）；常用：开心 / 搞笑 / 得意 / 无语 / 生气 / 悲伤 / 震惊 / 通用 |
-| author | 否 | 作者 / 出处，≤40 字，如 @画师名 |
-| platform | 否 | 来源平台，≤20 字，如 bilibili / 微博 / 小红书 / Pixiv / Lofter / X（Twitter）/ 抖音 |
-| sourceUrl | 否 | 原帖链接，http(s):// 开头，非法值会被丢弃（前端未用，预留） |
-| hp | — | 蜜罐字段，**永远不要填**（填了会被当作机器人，假装成功但不入库） |
-
-响应：`{"ok":true,"id":"u1789…"}`。投稿进入待审队列（status=pending），站长在后台通过后公开，id 前后不变。
-
-```bash
-curl -X POST https://api.agarena.xyz/api/stickers/submit \
-  -H "Content-Type: application/json" \
-  -d '{"img":"data:image/png;base64,iVBORw0KGgoAAAANS…","title":"看馋了","characters":["doubao"],"tags":["震惊","搞笑"],"author":"@你的账号","platform":"bilibili"}'
-```
-
-### 公开数据
-
-```
-GET https://api.agarena.xyz/api/stickers
-```
-
-返回已发布表情数组（id/file/title/characters/tags/author/platform/sourceUrl/likes/added/ts），缓存 60 秒。`file` 为图片直链：官方图是站内相对路径（如 `assets/sticker-05.png`，站外消费请自行拼接 `https://stickers.agarena.xyz/` 前缀），投稿图是 dataURL。
-
-```
-GET https://api.agarena.xyz/api/stickers/comments
-```
-
-返回全量评论 `{ 表情id: [{id,nick,text,ts}] }`，缓存 30 秒。
-
-### 点赞与评论（页面交互用）
-
-```
-POST https://api.agarena.xyz/api/stickers/like
-{"id":"s05","vid":"u-…","liked":true}   →  {"ok":true,"liked":true,"likes":357}
-```
-
-按 `vid` 去重（重复点赞幂等）。`vid` 是前端生成并持久化在 localStorage（`shufy_anon`）的访客匿名 id。
-
-```
-POST https://api.agarena.xyz/api/stickers/comment
-{"stickerId":"s05","nick":"路人","text":"太可爱了","vid":"u-…"}   →  {"ok":true,"comment":{…}}
-```
-
-留言即显（蜜罐 + 限流），后台可删；text 必填 ≤500 字，nick 选填 ≤20 字（默认「匿名」）。
+旧接口 `POST https://api.agarena.xyz/api/stickers/submit` 已封口，一律返回 `410 {"ok":false,"msg":"migrated…"}`；点赞、评论接口随旧站下线不再接受调用，读接口（`GET /api/stickers` 等）冻结为只读归档。
 
 ## 内容管理与审核
 
