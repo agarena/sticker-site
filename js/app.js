@@ -63,6 +63,7 @@ addEventListener("pagehide", reportDwell);
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") reportDwell(); });
 
 const state = { chars: new Set(), tag: null, uncategorized: false, noTags: false, q: "", sort: "new" };
+let homeLimit = 8; // 首页「最新上架」展示数，点「加载更多」递增
 
 const charName = (key) => (CHARACTERS.find(c => c.key === key) || { name: key }).name;
 const esc = (s) => String(s).replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
@@ -441,8 +442,9 @@ function viewHome() {
   <section class="latest">
       <div class="sec"><h2>最新上架</h2><button class="sec-more link" data-goto-lib>进入表情库 ${icon("arrow-right", 13)}</button></div>
     <div class="masonry" id="homeGrid">
-      ${allStickers().slice(0, 8).map((s, i) => cardHTML(s, i)).join("")}
+      ${allStickers().slice(0, homeLimit).map((s, i) => cardHTML(s, i)).join("")}
     </div>
+    ${allStickers().length > homeLimit ? `<div class="load-more"><button class="btn" id="homeMore">加载更多（还有 ${allStickers().length - homeLimit} 张）</button></div>` : ""}
   </section>`;
 }
 
@@ -456,6 +458,7 @@ function bindHome(root) {
   if (none) none.onclick = () => { state.chars.clear(); state.tag = null; state.uncategorized = true; state.noTags = false; go("library"); };
   $$(".role", root).forEach(r => r.onclick = () => { state.chars = new Set([r.dataset.role]); state.tag = null; state.uncategorized = false; state.noTags = false; go("library"); });
   $("[data-goto-lib]", root).onclick = () => go("library");
+  $("#homeMore", root)?.addEventListener("click", () => { homeLimit += 12; renderView(); });
   bindCardEvents($("#homeGrid", root));
 }
 

@@ -395,3 +395,7 @@ body.modal-open #modalBackdrop { display: flex; }
   0%, 55% { box-shadow: 0 0 0 4px rgba(226, 139, 58, 0.55), 0 10px 24px rgba(0, 0, 0, 0.12); }
   100% { box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08); }
 }
+
+/* 首页加载更多 */
+.load-more { display: flex; justify-content: center; padding: 8px 0 4px; }
+.load-more .btn { padding: 10px 26px; }
