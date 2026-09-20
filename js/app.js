@@ -145,6 +145,7 @@ function cardHTML(s, idx) {
         <button class="act act-like ${likedMap[s.id] ? "on" : ""}" data-act="like" data-like="${s.id}" title="点赞">${icon("heart", 13)}<i>${likeCount(s)}</i></button>
         <button class="act" data-act="copy" title="复制图片">${icon("copy", 13)}</button>
         <button class="act" data-act="comments" title="评论">${icon("message", 13)}<i>${commentCount(s)}</i></button>
+        <button class="act" data-act="share" title="分享这张表情">${icon("share", 13)}</button>
       </div>
     </figcaption>
   </figure>`;
@@ -162,6 +163,13 @@ function bindCardEvents(root) {
         if (kind === "like") toggleLike(s.id);
         if (kind === "copy") copySticker(s);
         if (kind === "comments") openModal(s.id, true);
+        if (kind === "share") {
+          const text = "【" + s.title + "】AI 表情库 · 不吃鲸B，各大模型角色二创表情一站收齐 " + location.origin + "/";
+          copyText(text).then(ok => {
+            if (ok) { toast("分享文案已复制，粘贴给朋友即可"); pfLog("share", s.id); }
+            else toast("复制失败，请手动复制", true);
+          });
+        }
         return;
       }
       const gotoChar = e.target.closest("[data-goto-char]");
