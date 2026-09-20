@@ -163,13 +163,7 @@ function bindCardEvents(root) {
         if (kind === "like") toggleLike(s.id);
         if (kind === "copy") copySticker(s);
         if (kind === "comments") openModal(s.id, true);
-        if (kind === "share") {
-          const text = "【" + s.title + "】AI 表情库 · 不吃鲸B，各大模型角色二创表情一站收齐 " + location.origin + "/";
-          copyText(text).then(ok => {
-            if (ok) { toast("分享文案已复制，粘贴给朋友即可"); pfLog("share", s.id); }
-            else toast("复制失败，请手动复制", true);
-          });
-        }
+        if (kind === "share") shareSticker(s);
         return;
       }
       const gotoChar = e.target.closest("[data-goto-char]");
@@ -196,6 +190,14 @@ function downloadSticker(s) {
   toast("已开始下载原图");
 }
 
+function shareSticker(s) {
+  const url = location.origin + "/?id=" + encodeURIComponent(s.id);
+  const text = "【" + s.title + "】AI 表情库 · 不吃鲸B，各大模型角色二创表情一站收齐 " + url;
+  copyText(text).then(ok => {
+    if (ok) { toast("分享文案已复制，粘贴给朋友即可"); pfLog("share", s.id); }
+    else toast("复制失败，请手动复制", true);
+  });
+}
 async function copyText(text) {
   try { await navigator.clipboard.writeText(text); return true; }
   catch {
@@ -314,13 +316,7 @@ function openModal(id, focusComments = false) {
     if (b.dataset.act2 === "download") downloadSticker(s);
     if (b.dataset.act2 === "copy") copySticker(s);
     if (b.dataset.act2 === "like") { toggleLike(s.id); $("#modal .btn-like i").textContent = likeCount(s); }
-    if (b.dataset.act2 === "share") {
-      const text = "【" + s.title + "】AI 表情库 · 不吃鲸B，各大模型角色二创表情一站收齐 " + location.origin + "/";
-      copyText(text).then(ok => {
-        if (ok) { toast("分享文案已复制，粘贴给朋友即可"); pfLog("share", s.id); }
-        else toast("复制失败，请手动复制", true);
-      });
-    }
+    if (b.dataset.act2 === "share") shareSticker(s);
   });
   const send = () => sendComment(s);
   $("#cmtSend").onclick = send;
@@ -833,6 +829,7 @@ async function loadRemote() {
       renderView();
     }
   } catch (e) { /* 离线/预览：保留 data.js 兜底，不上报 */ }
+  handleDeepLink();
   if (API_ON) {
     collectSend([{ type: "page_view", path: SITE_PATH, ts: Date.now() }]);
     pfLog("page_view", "", { ref: document.referrer || null });
@@ -841,5 +838,31 @@ async function loadRemote() {
     const site = await fetch(API_BASE + "/api/site").then(r => r.ok ? r.json() : null);
     if (site && site.contact_email) { const m = $("#aboutMail"); if (m) m.textContent = site.contact_email; }
   } catch (e) { }
+}
+/* 分享深链：?id=表情id → 切表情库、清筛选、定位高亮并直接打开详情弹窗 */
+const DEEP_ID = (() => { try { return (new URLSearchParams(location.search).get("id") || "").slice(0, 60); } catch { return ""; } })();
+function handleDeepLink() {
+  if (!DEEP_ID) return;
+  const s = STICKERS.find(x => x.id === DEEP_ID);
+  if (!s) {
+    toast("该表情不存在或未公开", true);
+    pfLog("share_open", DEEP_ID, { found: false });
+    return;
+  }
+  state.chars.clear(); state.tag = null; state.uncategorized = false; state.noTags = false; state.q = "";
+  const nav = $("#navSearch"); if (nav) nav.value = "";
+  // 用 replaceState 切到表情库（不触发 hashchange 重渲染，避免与高亮竞态）
+  history.replaceState(null, "", location.pathname + location.search + "#library");
+  renderView();
+  requestAnimationFrame(() => {
+    const el = document.querySelector('.card[data-id="' + (window.CSS && CSS.escape ? CSS.escape(DEEP_ID) : DEEP_ID) + '"]');
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      el.classList.add("flash");
+      setTimeout(() => el.classList.remove("flash"), 2400);
+    }
+  });
+  openModal(DEEP_ID);
+  pfLog("share_open", DEEP_ID, { found: true });
 }
 document.addEventListener("DOMContentLoaded", loadRemote);
